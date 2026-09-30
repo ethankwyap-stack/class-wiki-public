@@ -1,0 +1,681 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Class Wiki</title>
+<script src="/site/marked.min.js"></script><script src="/site/katex/katex.min.js"></script>
+<link rel="stylesheet" href="/site/katex/katex.min.css"><style>
+[hidden]{display:none!important}
+:root{--bg:#0a0908;--ink:#ece6dc;--dim:#9a9184;--line:#27221d;--card:#131110;--glow:#e0873a;--cosmic:#6b5bd6;--bad:#ff7a66;--ok:#6fbf8b;--on:#1a0e03;--ridge:#241c16;--star:#fff}
+@media (prefers-color-scheme:light){:root{--bg:#f5f1ea;--ink:#1a1612;--dim:#6b6357;--line:#ded6c8;--card:#fffdf9;--glow:#b85a14;--cosmic:#7d6ce0;--bad:#c62828;--ok:#2e7d4f;--on:#fff;--ridge:#e8dfcf;--star:transparent}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 ui-sans-serif,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+/* sky: ember glow at the horizon, a violet nebula top right, a few stars, two ridges. Fixed, so it never scrolls under the text. */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;
+background:radial-gradient(75vw 46vh at 22% 108%,color-mix(in srgb,var(--glow) 46%,transparent),transparent 70%),
+radial-gradient(52vw 44vh at 94% 2%,color-mix(in srgb,var(--cosmic) 30%,transparent),transparent 70%);animation:drift 53s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(-2vw,1.5vh,0) scale(1.06)}}
+.sky{position:fixed;inset:0 0 40% 0;pointer-events:none;
+background:radial-gradient(1.2px 1.2px at 8% 14%,var(--star),transparent),radial-gradient(1px 1px at 17% 41%,var(--star),transparent),
+radial-gradient(1.4px 1.4px at 29% 9%,var(--star),transparent),radial-gradient(1px 1px at 38% 33%,var(--star),transparent),
+radial-gradient(1.2px 1.2px at 47% 17%,var(--star),transparent),radial-gradient(1px 1px at 58% 48%,var(--star),transparent),
+radial-gradient(1.4px 1.4px at 66% 12%,var(--star),transparent),radial-gradient(1px 1px at 74% 37%,var(--star),transparent),
+radial-gradient(1.2px 1.2px at 83% 22%,var(--star),transparent),radial-gradient(1px 1px at 91% 45%,var(--star),transparent),
+radial-gradient(1px 1px at 4% 62%,var(--star),transparent),radial-gradient(1.2px 1.2px at 96% 71%,var(--star),transparent);
+opacity:.95;-webkit-mask:linear-gradient(#000,transparent);mask:linear-gradient(#000,transparent)}
+.ridge{position:fixed;left:0;right:0;bottom:0;height:30vh;pointer-events:none;background:var(--ridge);
+-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill-opacity='.5' d='M0 210 220 110 360 170 560 60 760 180 940 90 1150 190 1300 120 1440 170V320H0Z'/%3E%3Cpath d='M0 270 180 200 330 250 520 170 700 260 900 210 1100 275 1280 220 1440 260V320H0Z'/%3E%3C/svg%3E") bottom/100% 100% no-repeat;
+mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'%3E%3Cpath fill-opacity='.5' d='M0 210 220 110 360 170 560 60 760 180 940 90 1150 190 1300 120 1440 170V320H0Z'/%3E%3Cpath d='M0 270 180 200 330 250 520 170 700 260 900 210 1100 275 1280 220 1440 260V320H0Z'/%3E%3C/svg%3E") bottom/100% 100% no-repeat}
+@media (prefers-reduced-motion:reduce){body::before{animation:none}}
+header{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;padding:13px 20px;
+background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{margin-right:auto;font:500 20px ui-serif,Georgia,serif;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:10px}
+.brand::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--glow);box-shadow:0 0 14px var(--glow)}
+header nav{display:flex;flex-wrap:wrap;gap:4px 18px}
+header nav a{color:var(--dim);text-decoration:none;font-size:13px;letter-spacing:.12em;text-transform:uppercase;transition:color .15s}
+header nav a:hover,header nav a.on{color:var(--ink)}
+main{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:28px 20px 140px}
+main.wide{max-width:1240px}
+#page.in{animation:in .35s cubic-bezier(.2,.7,.2,1)}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){#page.in{animation:none}}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-bottom:26px;font-size:14px;color:var(--dim)}
+.crumbs:empty{display:none}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;padding:6px 14px;border-radius:999px;color:var(--ink);background:color-mix(in srgb,var(--card) 80%,transparent);border:1px solid var(--line);transition:border-color .15s,transform .15s}
+.back:hover{border-color:var(--glow);transform:translateX(-2px)}
+.trail a{color:var(--dim);text-decoration:none}.trail a:hover{color:var(--ink)}
+.trail .cur{color:var(--ink)}
+.crumbs .ext{margin-left:auto;font-size:13px;color:var(--dim)}
+.doc{max-width:740px;font-size:17px;line-height:1.75}
+.doc h2{margin-top:2em}
+h1,h2,h3{font-family:ui-serif,Georgia,serif;font-weight:500;line-height:1.2}
+h1{font-size:clamp(34px,6vw,54px);margin:0 0 22px;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 14px}
+a{color:var(--glow)}
+table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+code{font:14px ui-monospace,Menlo,monospace;background:var(--card);padding:2px 5px;border-radius:4px}
+pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto}
+pre code{padding:0}
+blockquote{margin:0;padding:4px 16px;border-left:3px solid var(--glow);color:var(--dim)}
+.k{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.lede{color:var(--dim);max-width:52ch;margin:-8px 0 30px}
+.note{border:1px dashed var(--line);border-radius:12px;padding:16px;color:var(--dim)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.card{position:relative;display:block;background:linear-gradient(180deg,color-mix(in srgb,var(--card) 92%,var(--ink)),var(--card));border:1px solid var(--line);border-radius:16px;padding:20px;color:inherit;text-decoration:none;
+transition:border-color .2s,transform .2s,box-shadow .2s;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--acc,var(--glow));opacity:.85}
+a.card:hover{border-color:var(--acc,var(--glow));transform:translateY(-3px);box-shadow:0 12px 34px -14px var(--acc,var(--glow))}
+.card h3{font-size:26px;margin:14px 0 30px}
+.card .go{position:absolute;right:18px;bottom:16px;color:var(--dim);transition:transform .2s,color .2s}
+a.card:hover .go{color:var(--acc,var(--glow));transform:translateX(4px)}
+form{display:flex;gap:8px;flex-wrap:wrap}
+input[type=text],input[type=url],input[type=search],textarea,select{font:inherit;color:inherit;background:color-mix(in srgb,var(--card) 85%,transparent);border:1px solid var(--line);border-radius:10px;padding:9px 13px;transition:border-color .15s}
+input[type=text],input[type=url],input[type=search]{flex:1;min-width:0}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--glow)}
+button{font:inherit;font-size:15px;font-weight:500;color:var(--on);background:var(--glow);border:0;border-radius:10px;padding:9px 18px;cursor:pointer;transition:filter .15s,transform .1s,border-color .15s}
+button:hover:not(:disabled){filter:brightness(1.1)}button:active:not(:disabled){transform:scale(.97)}
+button:disabled{opacity:.5;cursor:default}
+.ghost,.back,.chip,.make .row button{color:var(--ink);background:none;border:1px solid var(--line);font-weight:400}
+.ghost:hover:not(:disabled),.chip:hover,.make .row button:hover{filter:none;border-color:var(--glow)}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 0 28px;overflow-x:auto}
+.tabs a{display:flex;gap:8px;align-items:baseline;padding:11px 18px;color:var(--dim);text-decoration:none;font-size:14px;letter-spacing:.1em;text-transform:uppercase;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s}
+.tabs a:hover{color:var(--ink)}
+.tabs a.on{color:var(--ink);border-color:var(--glow)}
+.cnt{font-size:12px;letter-spacing:0;color:var(--dim)}
+.banner:empty{display:none}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+.drop{display:block;border:1.5px dashed var(--line);border-radius:14px;padding:34px 16px;text-align:center;color:var(--dim);cursor:pointer;
+margin-bottom:12px;transition:border-color .2s,background .2s}
+.drop.over,.drop:hover{border-color:var(--glow);background:color-mix(in srgb,var(--glow) 8%,transparent)}
+ul.list{list-style:none;margin:10px 0 0;padding:0}
+ul.list li{padding:12px 2px;border-top:1px solid var(--line);overflow-wrap:anywhere}
+ul.list a{text-decoration:none;color:var(--ink);font-size:17px}
+ul.list a:hover{color:var(--glow)}
+.bad{color:var(--bad)}
+.status{margin:12px 0;color:var(--dim)}
+.status.busy::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--glow);margin-right:8px;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.25}}
+details pre{font-size:12px;max-height:260px;overflow:auto}
+.pill{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--glow);border:1px solid color-mix(in srgb,var(--glow) 50%,transparent);border-radius:999px;padding:1px 9px;margin-left:10px;vertical-align:middle}
+#findpg,#find{width:100%}
+.fold summary{cursor:pointer;list-style:none}.fold summary::-webkit-details-marker{display:none}
+.fold summary h2{display:inline}.fold summary h2::after{content:" ▾";color:var(--dim);font-size:.7em}
+.fold:not([open]) summary h2::after{content:" ▸"}
+.fold input{margin-top:12px}.fold ul.list{max-height:460px;overflow:auto}
+.del{float:right;background:none;color:var(--dim);border:1px solid transparent;padding:1px 9px;font-size:14px;font-weight:400;opacity:.5}
+.del:hover:not(:disabled){color:var(--bad);border-color:var(--bad);opacity:1;filter:none}li:hover .del,.out:hover .del,.del:focus-visible{opacity:1}
+@media (hover:none){.del{opacity:1}}
+.out .del{position:absolute;right:12px;bottom:12px;z-index:1;float:none}
+.score{position:absolute;top:16px;right:16px;font-size:13px;font-weight:600;border-radius:999px;padding:2px 11px;color:var(--ink);border:1px solid var(--line)}
+.score.good{color:var(--ok);border-color:var(--ok)}.score.low{color:var(--bad);border-color:var(--bad)}.score.mid{color:var(--glow);border-color:var(--glow)}
+.snip{color:var(--dim);font-size:13px;margin-top:4px}
+.sec{margin-bottom:40px}
+.cal-top{display:flex;align-items:center;gap:10px;margin:0 0 14px}.cal-top h2{margin:0 auto 0 6px;font-size:26px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.cal .dow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:8px;border-bottom:1px solid var(--line)}
+.cal .day{min-height:92px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);font-size:12px;color:var(--dim)}
+.cal .day:nth-child(7n){border-right:0}.cal .day.off{opacity:.45}.cal .day.today{background:color-mix(in srgb,var(--glow) 12%,transparent)}
+.cal .day.today>span{color:var(--glow);font-weight:700}
+.cal a.ev{display:block;margin-top:4px;padding:2px 6px;border-radius:6px;border-left:3px solid var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--ink);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal a.ev.exam{font-weight:700;background:color-mix(in srgb,var(--acc) 30%,transparent)}
+.key{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:13px;color:var(--dim)}.key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--acc)}
+@media(max-width:640px){.cal .day{min-height:64px;padding:3px}.cal a.ev{font-size:10px;padding:1px 3px}}.list li b+.k{margin-left:8px}
+.due{font-size:13px;color:var(--dim);margin:-14px 0 18px}.due b{color:var(--acc,var(--glow));font-weight:600}.due.soon b{color:#d9694f}
+.pill.big{color:#d9694f;border-color:currentColor}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+.chip{font-size:14px;padding:6px 14px;border-radius:999px;color:var(--dim)}
+.chip.on{background:color-mix(in srgb,var(--glow) 15%,transparent);border-color:var(--glow);color:var(--ink)}
+.outs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.out{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;transition:border-color .2s,transform .2s}
+.out:hover{border-color:var(--glow);transform:translateY(-2px)}
+.out h3{font-size:19px;margin:10px 0 8px}
+.out .stretch{color:var(--ink);text-decoration:none}.out .stretch::after{content:"";position:absolute;inset:0;border-radius:14px}
+.out .ico{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;font-size:16px;color:var(--glow);background:color-mix(in srgb,var(--glow) 13%,transparent)}
+.out .mini{position:relative;z-index:1;display:inline-block;margin:10px 8px 0 0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:2px 10px;text-decoration:none}
+.out .mini:hover{color:var(--ink);border-color:var(--glow)}
+.make{margin-bottom:38px}
+.make select{padding:9px}
+.make #aud{width:100%;margin-top:8px}
+.make .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.today{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 18px;padding:14px 18px;border:1px solid color-mix(in srgb,var(--glow) 45%,var(--line));border-radius:14px;
+background:linear-gradient(90deg,color-mix(in srgb,var(--glow) 12%,var(--card)),var(--card))}.today b{font-size:17px}.today a.btn{margin-left:auto}
+.today.done{border-color:var(--line);background:var(--card);color:var(--dim)}
+a.btn{display:inline-block;padding:9px 16px;border-radius:10px;background:var(--glow);color:var(--on);text-decoration:none;font-weight:600}
+.ticks{list-style:none;padding:0;margin:8px 0 0;max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.ticks label{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line)}
+.ticks li:last-child label{border-bottom:0}.ticks label:hover{background:color-mix(in srgb,var(--glow) 8%,transparent)}
+.ticks input{margin-top:3px;accent-color:var(--glow)}
+.make #qtopic,.make #qfind{width:100%;margin-top:12px}
+.make .stop{float:right;padding:2px 10px;font-size:13px;background:none;color:var(--bad);border:1px solid var(--bad)}
+.frame iframe{display:block;width:100%;height:calc(100vh - 190px);min-height:520px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.fab{position:fixed;right:18px;bottom:18px;z-index:6;box-shadow:0 8px 28px #0007;padding:11px 20px;border-radius:999px}
+.chat{position:fixed;right:18px;bottom:18px;z-index:6;width:min(420px,calc(100vw - 32px));height:min(600px,calc(100vh - 32px));
+display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 14px 44px #000a}
+.chat-top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.chat-top button{background:none;color:var(--dim);padding:2px 8px}
+.chat-log{flex:1;overflow-y:auto;padding:12px 14px;font-size:15px}
+.chat-log .u{margin:10px 0 10px auto;width:fit-content;max-width:85%;background:var(--glow);color:var(--on);padding:6px 12px;border-radius:12px}
+.chat-log .a p:first-child{margin-top:0}
+.chat form{padding:10px;border-top:1px solid var(--line)}
+.chat .mode{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--dim)}
+.practice{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:28px;background:var(--card)}
+.practice .row{display:flex;flex-wrap:wrap;gap:8px}
+.practice textarea{width:100%;min-height:140px;margin:10px 0}
+.practice p.k,.practice .k{text-transform:none;letter-spacing:0;font-size:14px}
+.practice .fb{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.flash{animation:flash 3s ease-in}
+@keyframes flash{0%,40%{background:color-mix(in srgb,#f5c542 35%,transparent)}}
+</style></head><body>
+<div class="sky"></div><div class="ridge"></div>
+<header><a class="brand" href="#/">Class Wiki</a><nav id="nav"></nav></header>
+<main><div class="crumbs" id="crumbs"></div><div id="page"></div></main>
+<button class="fab" id="fab" hidden>Ask Claude</button>
+<aside class="chat" id="chat" aria-label="Ask Claude about this class" hidden>
+  <div class="chat-top"><strong>Ask Claude</strong><button id="chatx" aria-label="Close chat">✕</button></div>
+  <div class="chat-log" id="chatlog" aria-live="polite"><p class="k">Answers come from this class's wiki. Each question uses your Claude plan.</p></div>
+  <form id="chatf"><label class="mode"><input type="checkbox" name="quiz"> Quiz me (Claude asks, you answer, it counts toward weak spots)</label>
+    <input type="text" name="q" placeholder="Ask about this class" required autocomplete="off"><button>Send</button></form>
+</aside>
+<script>
+const page = document.getElementById("page"), nav = document.getElementById("nav"), byId = id => document.getElementById(id);
+const H = {"X-Class-Wiki": "1"};  // the server refuses writes without it (blocks other websites)
+const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+let timer;
+
+nav.innerHTML = '<a href="#/">Classes</a> <a href="#/calendar">Calendar</a> <a href="#/wiki/index.md">Index</a> <a href="#/wiki/log.md">Log</a>';
+
+async function post(url, body) {  // body: a File, or an object sent as JSON
+  const r = await fetch(url, {method: "POST", headers: H, body: body instanceof File ? body : JSON.stringify(body)});
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || r.statusText);
+  return d;
+}
+
+const delBtn = (path, title, warn) => `<button class="del" data-del="${esc(path)}" data-msg="${esc(warn + ' It moves to the .trash folder.')}" title="Delete" aria-label="Delete ${esc(title)}">✕</button>`;
+const scorePill = r => {  // a quiz's score on its card: green 80%+, red under 50%
+  if (!r) return "";
+  const f = r.right / Math.max(r.done, 1);
+  return `<span class="score ${r.done < r.of ? "mid" : f >= .8 ? "good" : f < .5 ? "low" : "mid"}">${r.done < r.of ? `${r.done}/${r.of} done` : `${r.right}/${r.of}`}</span>`;
+};
+page.addEventListener("click", async e => {  // every ✕ button on the class page
+  const b = e.target.closest("[data-del]");
+  if (!b) return;
+  e.preventDefault();
+  if (!confirm(b.dataset.msg)) return;
+  b.disabled = true;
+  try { await post("/api/delete", {class: page.dataset.cls, path: b.dataset.del}); } catch (x) { alert(x.message); }
+  page.reload?.();
+});
+
+const ACCENT = ["#e0873a", "#7fa35c", "#4f9db8", "#9a7bd0", "#c4664a", "#c9a24a"];  // ember, moss, glacier, dusk, clay, ochre
+
+const when = d => d === 0 ? "today" : d === 1 ? "tomorrow" : `in ${d} days`;
+const dueLine = i => i ? `<div class="due${i.days <= 7 ? " soon" : ""}"><b>${esc(i.title)}</b> ${when(i.days)}${i.weight_pct ? ` · ${+i.weight_pct}% of grade` : ""}</div>` : "";
+
+async function calendar() {
+  const rows = await (await fetch("/api/calendar")).json();
+  let month = new Date(); month.setDate(1);
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const draw = () => {
+    const first = new Date(month), start = new Date(first); start.setDate(1 - first.getDay());
+    const cells = [];
+    for (let d = new Date(start); cells.length < 42; d.setDate(d.getDate() + 1)) {
+      const day = iso(d);
+      cells.push(`<div class="day${d.getMonth() !== first.getMonth() ? " off" : ""}${day === iso(new Date()) ? " today" : ""}"><span>${d.getDate()}</span>` +
+        rows.filter(r => r.due_date === day).map(r => `<a class="ev${r.type === "exam" ? " exam" : ""}" style="--acc:${ACCENT[r.idx % ACCENT.length]}" href="#/c/${esc(r.class)}/deadlines"
+          title="${esc(r.name)}: ${esc(r.title)}${r.weight_pct ? ` (${+r.weight_pct}% of grade)` : ""}">${esc(r.title)}</a>`).join("") + "</div>");
+    }
+    const seen = [...new Map(rows.map(r => [r.class, r])).values()];
+    page.innerHTML = `<div class="k">Every class</div><h1>Calendar</h1>
+      <div class="cal-top"><button class="ghost" id="prev" aria-label="Last month">←</button><h2>${first.toLocaleString("en-US", {month: "long", year: "numeric"})}</h2>
+        <button class="ghost" id="tod">Today</button><button class="ghost" id="next" aria-label="Next month">→</button></div>
+      <div class="cal">${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => `<div class="dow">${d}</div>`).join("")}${cells.join("")}</div>
+      <div class="key">${seen.map(r => `<span style="--acc:${ACCENT[r.idx % ACCENT.length]}"><i></i>${esc(r.name)}</span>`).join("") || "Nothing from your planner yet."}</div>`;
+    byId("prev").onclick = () => { month.setMonth(month.getMonth() - 1); draw(); };
+    byId("next").onclick = () => { month.setMonth(month.getMonth() + 1); draw(); };
+    byId("tod").onclick = () => { month = new Date(); month.setDate(1); draw(); };
+  };
+  draw();
+}
+
+async function home() {
+  const cs = await (await fetch("/api/classes")).json();
+  page.innerHTML = `<div class="k">Class Wiki</div><h1>Your classes</h1>
+    <p class="lede">Read your lectures, test yourself, and make study tools. Everything comes from your own material.</p>
+    <input type="search" id="findall" style="width:100%;max-width:520px;margin-bottom:12px" placeholder="Search every class's wiki" aria-label="Search every class's wiki"><ul class="list" id="allhits"></ul><div class="grid">` +
+    cs.map((c, i) => `<a class="card" style="--acc:${ACCENT[i % ACCENT.length]}" href="#/c/${esc(c.slug)}"><h3>${esc(c.name)}</h3>${dueLine(c.next)}
+      <div class="k">${c.pages} wiki page${c.pages === 1 ? "" : "s"}</div>${c.daily === "ready" ? '<div class="k" style="color:var(--acc);margin-top:6px">☀ Today\'s review is ready</div>' : c.daily === "done" ? '<div class="k" style="margin-top:6px">✓ Reviewed today</div>' : ""}<span class="go">→</span></a>`).join("") +
+    `<div class="card"><h3>New class</h3><form id="new"><input type="text" name="n" placeholder="e.g. CHE 2A" required><button>Add</button></form>
+     <p class="bad" id="err"></p></div></div>`;
+  let wait;
+  byId("findall").oninput = e => {  // one box for every class: the wiki pages that mention it
+    clearTimeout(wait);
+    wait = setTimeout(async () => {
+      const q = e.target.value.trim(), hits = q ? await (await fetch(`/api/search?in=wiki&q=${encodeURIComponent(q)}`)).json() : [];
+      byId("allhits").innerHTML = hits.map(h => `<li><a href="#/${esc(h.path)}">${esc(h.title)}</a> <span class="k">${esc(h.class)}</span><div class="snip">…${esc(h.snippet)}…</div></li>`).join("")
+        || (q ? '<li class="k">No wiki page mentions that</li>' : "");
+    }, 250);
+  };
+  byId("new").onsubmit = async e => {
+    e.preventDefault();
+    try { location.hash = "#/c/" + (await post("/api/classes", {name: e.target.n.value})).slug; }
+    catch (x) { byId("err").textContent = x.message; }
+  };
+}
+
+const TABS = [["wiki", "Wiki"], ["sources", "Sources"], ["quiz", "Quiz"], ["study", "Study"], ["deadlines", "Deadlines"], ["progress", "Progress"]];
+const KIND = {daily: ["Daily reviews", "☀"], quizzes: ["Quizzes", "?"], cards: ["Flashcards", "▤"], slides: ["Slides", "▦"], audio: ["Podcasts", "♪"], video: ["Videos", "▶"],
+              maps: ["Mind maps", "✦"], reports: ["Reports", "≡"], tables: ["Tables", "▥"], sheets: ["Notes sheets", "✎"], exam: ["Exam prep", "★"]};
+const openHref = path => /\.(html|pdf|mp3|mp4)$/.test(path) ? "#/view/" + path : "#/" + path;
+
+function setTab(t) {
+  t = TABS.some(x => x[0] === t) ? t : "wiki";
+  for (const sec of page.querySelectorAll("section[data-t]")) sec.hidden = sec.dataset.t !== t;
+  for (const a of byId("tabs").children) a.classList.toggle("on", a.dataset.t === t);
+}
+
+async function klass(slug, tab) {
+  page.dataset.cls = slug;
+  page.innerHTML = `<div class="k">Class</div><h1 id="name"></h1><div id="dueline"></div><div id="today"></div>
+    <nav class="tabs" id="tabs">${TABS.map(([t, n]) => `<a href="#/c/${slug}/${t}" data-t="${t}">${n}<span class="cnt" id="n-${t}"></span></a>`).join("")}</nav>
+    <div class="banner"><p class="bad" id="err"></p><div class="status" id="status"></div>
+      <details id="logbox" hidden><summary class="k">Details</summary><pre id="log"></pre></details><ul class="list" id="pending"></ul></div>
+    <section data-t="wiki"><input type="search" id="findpg" placeholder="Search inside your wiki pages"><ul class="list" id="pages"></ul></section>
+    <section data-t="sources" hidden><div class="cols"><div>
+      <h2>Add sources</h2>
+      <label class="drop" id="drop">Drop PDFs, transcripts (.txt) or photos here, or click to choose.<br><span class="k">AirDrop iPhone photos to your Mac first</span>
+        <input type="file" id="file" multiple accept=".pdf,.txt,.md,image/*,.heic,.heif" hidden></label>
+      <form id="yt"><input type="url" name="u" placeholder="YouTube or public Google Doc link" required><button>Add</button></form></div>
+      <details class="fold" open><summary><h2>Your sources <span class="cnt" id="srccnt"></span></h2></summary><input type="search" id="find" placeholder="Search inside your sources"><ul class="list" id="sources"></ul></details></div></section>
+    <section data-t="quiz" hidden>
+      <div class="make"><h2>Quiz yourself on anything</h2>
+        <p class="k">Tick lectures or topics, or type your own. Leave all empty for the whole class.</p>
+        <input type="search" id="qfind" placeholder="Filter the lists">
+        <div class="cols"><div><h3>Lectures and readings</h3><ul class="ticks" id="qsrc"></ul></div>
+          <div><h3>Topics</h3><ul class="ticks" id="qpg"></ul></div></div>
+        <input type="text" id="qtopic" placeholder="Or type a topic in your own words, e.g. why experiments beat correlations">
+        <div class="row"><select id="qlen"><option value="short">5 questions</option><option value="" selected>10 questions</option><option value="long">20 questions</option></select>
+          <button id="qmake">Make quiz</button><button id="qexam" title="Only the pages your next exam covers">Next exam quiz</button>
+          <button id="qpast" title="Only the concepts your teacher already asked about (Canvas, old tests)" hidden>Past test concepts</button></div>
+        <p class="k" id="qsum"></p></div>
+      <h2>Your quizzes</h2><ul class="list" id="qlist"></ul></section>
+    <section data-t="study" hidden>
+      <div class="make"><h2>Make something new</h2>
+        <form><input type="text" id="topic" placeholder="Topic (optional)" title="Report: study-guide, faq, glossary, timeline, briefing. Table: your question.">
+          <select id="len"><option value="">Normal length</option><option>short</option><option>long</option></select></form>
+        <input type="text" id="aud" placeholder='Audience (optional), e.g. explain like I am new'>
+        <div class="row" id="tools"></div><ul class="list" id="making"></ul></div>
+      <h2>Your study outputs</h2><div class="chips" id="kinds"></div><div class="outs" id="outs"></div></section>
+    <section data-t="deadlines" hidden><ul class="list" id="coming"></ul></section>
+    <section data-t="progress" hidden>
+      <div class="sec"><h2>Weak spots</h2><ul class="list" id="weak"></ul></div>
+      <div class="sec"><h2>Missed questions</h2><ul class="list" id="missed"></ul></div></section>`;
+  setTab(tab);
+  const drop = document.getElementById("drop"), err = document.getElementById("err");
+  const send = async files => {
+    err.textContent = "";
+    let i = 0;
+    for (const f of files) {
+      document.getElementById("status").textContent = `Uploading ${++i} of ${files.length}: ${f.name}`;
+      try { await post(`/api/upload?class=${slug}&name=${encodeURIComponent(f.name)}`, f); }
+      catch (x) { err.textContent += `${f.name}: ${x.message}. `; }
+    }
+    refresh();
+  };
+  document.getElementById("file").onchange = e => send([...e.target.files]);
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+  drop.ondragleave = () => drop.classList.remove("over");
+  drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); send([...e.dataTransfer.files]); };
+  document.getElementById("yt").onsubmit = async e => {
+    e.preventDefault(); err.textContent = "";
+    try { await post("/api/link", {class: slug, url: e.target.u.value}); e.target.reset(); }
+    catch (x) { err.textContent = x.message; }
+    refresh();
+  };
+
+  const TOOLS = {daily: "Daily review", quiz: "Quiz", cards: "Flashcards", slides: "Slides", audio: "Podcast", video: "Video",
+                 map: "Mind map", report: "Report", table: "Table", sheet: "Notes sheet", exam: "Exam prep"};
+  document.getElementById("tools").innerHTML = Object.entries(TOOLS).filter(([k]) => !/daily|quiz/.test(k)).map(([k, v]) => `<button data-k="${k}">${v}</button>`).join("") +
+    ["cards", "sheet"].map(k => `<button data-k="${k}" data-x="--exam next" title="Only the pages your next exam covers">${TOOLS[k]}: next exam</button>`).join("");
+  document.getElementById("tools").onclick = async e => {
+    const k = e.target.dataset.k;
+    if (!k) return;
+    err.textContent = "";
+    const v = id => document.getElementById(id).value.trim().replace(/"/g, "'");
+    const topic = [v("topic"), e.target.dataset.x, v("len") && "--length " + v("len"), v("aud") && `--audience "${v("aud")}"`].filter(Boolean).join(" ");
+    try { await post("/api/study", {class: slug, kind: k, topic}); }
+    catch (x) { err.textContent = x.message; }
+    refresh();
+  };
+
+  document.getElementById("making").onclick = async e => {
+    const k = e.target.dataset.k;
+    if (!k) return;
+    e.target.disabled = true;
+    await post("/api/cancel", {class: slug, kind: k});
+    refresh();
+  };
+
+  const chat = document.getElementById("chat"), fab = document.getElementById("fab"), log = document.getElementById("chatlog");
+  const talk = [];  // this page visit only; a new class starts a new chat
+  log.innerHTML = log.firstElementChild.outerHTML;
+  fab.hidden = false;
+  fab.onclick = () => { chat.hidden = false; fab.hidden = true; document.getElementById("chatf").q.focus(); };
+  document.getElementById("chatx").onclick = () => { chat.hidden = true; fab.hidden = false; };
+  const cf = document.getElementById("chatf");
+  cf.quiz.checked = false;
+  cf.quiz.onchange = () => {  // Quiz me starts itself: Claude asks the first question
+    cf.q.required = !cf.quiz.checked;
+    cf.q.placeholder = cf.quiz.checked ? "Your answer (Send empty to start)" : "Ask about this class";
+  };
+  cf.onsubmit = async e => {  // one question = one `claude -p` on your plan (serve.py chat)
+    e.preventDefault();
+    const f = e.target, b = f.querySelector("button"), text = f.q.value.trim() || "Quiz me.";
+    talk.push({role: "user", text});
+    log.insertAdjacentHTML("beforeend", `<div class="u">${esc(text)}</div><div class="a status busy">Thinking…</div>`);
+    f.q.value = ""; b.disabled = true; log.scrollTop = log.scrollHeight;
+    const a = log.lastChild;
+    try {
+      const {answer} = await post("/api/chat", {class: slug, messages: talk, mode: f.quiz.checked ? "quiz" : ""});
+      talk.push({role: "assistant", text: answer});
+      a.className = "a"; a.innerHTML = render(answer);
+    } catch (x) { talk.pop(); a.className = "a bad"; a.textContent = x.message; }
+    b.disabled = false; log.scrollTop = log.scrollHeight;
+  };
+
+  let sources = [], wait;
+  const find = document.getElementById("find");
+  const showSources = list => document.getElementById("sources").innerHTML = list.length
+    ? list.map(s => `<li>${delBtn(s.path, s.title, "Delete this source? Wiki pages already written from it stay.")}<a href="#/${esc(s.path)}">${esc(s.title)}</a>` +
+        (s.original ? ` <a class="k" href="/${esc(s.original)}" target="_blank">original</a>` : "") +
+        (s.snippet ? `<div class="snip">…${esc(s.snippet)}…</div>` : "") + "</li>").join("")
+    : `<li class="k">${find.value.trim() ? "No source mentions that" : "None yet"}</li>`;
+  find.oninput = () => {  // search the text of every source (server side), 250 ms after typing stops
+    clearTimeout(wait);
+    wait = setTimeout(async () => {
+      const q = find.value.trim();
+      showSources(q ? await (await fetch(`/api/search?class=${slug}&q=${encodeURIComponent(q)}`)).json() : sources);
+    }, 250);
+  };
+
+  let tried = {}, pages = [], waitpg;
+  const testedPill = p => p.tested ? ` <span class="pill big" title="Your teacher asked about this ${p.tested} time${p.tested === 1 ? "" : "s"} (Canvas, old tests)">On a test</span>` : "";
+  const findpg = document.getElementById("findpg");
+  const showPages = list => document.getElementById("pages").innerHTML = list.length
+    ? list.map(p => `<li>${delBtn(p.path, p.title, "Delete this wiki page? Pages that link to it will have a broken link.")}<a href="#/${esc(p.path)}">${esc(p.title)}</a>` +
+        (tried[p.path] ? "" : ' <span class="pill" title="New page: test yourself first, then write a summary">New</span>') + testedPill(p) +
+        (p.snippet ? `<div class="snip">…${esc(p.snippet)}…</div>` : "") + "</li>").join("")
+    : `<li class="k">${findpg.value.trim() ? "No page mentions that" : "Pages appear here after your first source is read."}</li>`;
+  findpg.oninput = () => {  // same as the source search, but over wiki/<class>/
+    clearTimeout(waitpg);
+    waitpg = setTimeout(async () => {
+      const q = findpg.value.trim();
+      showPages(q ? await (await fetch(`/api/search?class=${slug}&in=wiki&q=${encodeURIComponent(q)}`)).json() : pages);
+    }, 250);
+  };
+
+  let outs = [], results = {}, kind = "";
+  const showOuts = () => {
+    const kinds = [...new Set(outs.map(o => o.kind))];
+    byId("kinds").hidden = !outs.length;
+    byId("kinds").innerHTML = ["", ...kinds].map(k => `<button class="chip${k === kind ? " on" : ""}" data-k="${esc(k)}">${k ? (KIND[k] || [k])[0] : "All"}
+      <span class="cnt">${k ? outs.filter(o => o.kind === k).length : outs.length}</span></button>`).join("");
+    const list = outs.filter(o => !kind || o.kind === kind);
+    byId("outs").innerHTML = list.length ? list.map(o => `<div class="out"><span class="ico">${(KIND[o.kind] || [0, "•"])[1]}</span>
+      <a class="stretch" href="${esc(openHref(o.path))}"><h3>${esc(o.title)}</h3></a>
+      <div class="k">${(KIND[o.kind] || [o.kind])[0]} · ${esc(o.date)}</div>${scorePill(results[o.path])}${delBtn(o.path, o.title, "Delete this study output?")}` +
+      o.also.map(x => `<a class="mini" href="/${esc(x.path)}" target="_blank">${esc(x.label)}</a>`).join("") + "</div>").join("")
+      : '<p class="note">Nothing made yet. Pick a tool above and it shows up here.</p>';
+  };
+  byId("kinds").onclick = e => { if (e.target.closest("button")) { kind = e.target.closest("button").dataset.k; showOuts(); } };
+
+  // Quiz tab: ticked lectures -> the wiki pages written from them (their "> Raw:" line), plus ticked pages
+  const picked = new Set(), qf = byId("qfind");
+  let qsources = [], qpages = [];
+  const tick = (list, empty) => list.length ? list.map(x => `<li><label><input type="checkbox" value="${esc(x.path)}"${picked.has(x.path) ? " checked" : ""}>
+    <span>${esc(x.title)}${testedPill(x)}</span></label></li>`).join("") : `<li class="k" style="padding:9px 12px">${empty}</li>`;
+  const chosen = () => qpages.filter(p => picked.has(p.path) || p.raw.some(r => picked.has(r))).map(p => p.path);
+  const showQuiz = () => {
+    const f = qf.value.trim().toLowerCase(), hit = x => !f || x.title.toLowerCase().includes(f);
+    byId("qsrc").innerHTML = tick(qsources.filter(hit), f ? "No match" : "No sources yet");
+    byId("qpg").innerHTML = tick(qpages.filter(hit), f ? "No match" : "No wiki pages yet");
+    byId("qpast").hidden = !qpages.some(p => p.tested);
+    const n = chosen().length, t = byId("qtopic").value.trim();
+    byId("qsum").textContent = n ? `${n} wiki page${n === 1 ? "" : "s"} picked${t ? ", plus your topic" : ""}.` : t ? "Claude finds the pages for your topic." : "Nothing picked: the quiz covers the whole class.";
+    byId("qlist").innerHTML = outs.filter(o => /daily|quizzes/.test(o.kind)).map(o => `<li><a href="${esc(openHref(o.path))}">${esc(o.title)}</a>
+      <span class="k">${esc(o.date)}</span>${scorePill(results[o.path])}</li>`).join("") || '<li class="k">No quizzes yet.</li>';
+  };
+  qf.oninput = byId("qtopic").oninput = showQuiz;
+  byId("qsrc").onchange = byId("qpg").onchange = e => { e.target.checked ? picked.add(e.target.value) : picked.delete(e.target.value); showQuiz(); };
+  const makeQuiz = async (extra, only) => {
+    err.textContent = "";
+    const pg = only || chosen(), len = byId("qlen").value;
+    const topic = [byId("qtopic").value.trim().replace(/"/g, "'"), pg.length && "--pages " + pg.join(","), extra, len && "--length " + len].filter(Boolean).join(" ");
+    try { await post("/api/study", {class: slug, kind: "quiz", topic}); picked.clear(); byId("qtopic").value = ""; showQuiz(); }
+    catch (x) { err.textContent = x.message; }
+    refresh();
+  };
+  byId("qmake").onclick = () => makeQuiz("");
+  byId("qexam").onclick = () => makeQuiz("--exam next");
+  byId("qpast").onclick = () => makeQuiz("", qpages.filter(p => p.tested).map(p => p.path));
+
+  let last;
+  page.reload = () => { last = ""; findpg.value = find.value = ""; refresh(); };
+  async function refresh() {
+    clearTimeout(timer);
+    if (location.hash !== "#/c/" + slug && !location.hash.startsWith("#/c/" + slug + "/")) return;
+    const r = await fetch("/api/class/" + slug);
+    if (!r.ok) { page.innerHTML = "<h1>No such class</h1>"; return; }
+    const text = await r.text(), d = JSON.parse(text);
+    const busy = d.ingest !== "idle";
+    timer = setTimeout(refresh, busy || d.pending.length || d.making.length ? 3000 : 15000);
+    if (text === last) return;  // nothing changed: keep the page (and the log's scroll) as is
+    last = text;
+    document.getElementById("name").textContent = d.name;
+    document.title = d.name + " · Class Wiki";
+    const st = document.getElementById("status");
+    st.className = "status" + (busy ? " busy" : "");
+    st.textContent = busy ? (d.ingest === "running" ? "Reading your sources and writing wiki pages… (a few minutes per file)" : "Waiting to start…")
+      : d.pending.length ? `${d.pending.length} file(s) waiting. Upload again or run ./ingest.sh ${slug}` : "";
+    document.getElementById("logbox").hidden = !d.log.length;
+    document.getElementById("log").textContent = d.log.join("\n");
+    document.getElementById("pending").innerHTML =
+      d.pending.map(n => `<li>⏳ ${esc(n)}</li>`).join("") + d.failed.map(n => `<li class="bad">✗ ${esc(n)}: could not read it (see Details)</li>`).join("") +
+      (d.failed.length && !busy ? '<li><button id="retry">Retry failed</button></li>' : "");
+    const rb = document.getElementById("retry");
+    if (rb) rb.onclick = async () => { rb.disabled = true; await post("/api/retry", {class: slug}); refresh(); };
+    sources = d.sources;
+    byId("n-sources").textContent = byId("srccnt").textContent = sources.length;
+    if (!find.value.trim()) showSources(sources);
+    tried = await fetch(`/studio/${slug}/scores.json`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+    pages = d.pages;
+    byId("n-wiki").textContent = pages.length;
+    if (!findpg.value.trim()) showPages(pages);
+    document.getElementById("making").innerHTML = d.making.map((k, i) =>
+      `<li class="status busy">${i ? "Waiting" : "Making"}: ${TOOLS[k]}${/audio|video/.test(k) ? " (10+ min)" : ""}
+       <button class="stop" data-k="${k}">Stop</button></li>`).join("");
+    byId("dueline").innerHTML = dueLine(d.focus || d.coming[0]);
+    const exam = d.coming.find(i => i.type === "exam");
+    byId("n-deadlines").textContent = d.coming.length || "";
+    byId("coming").innerHTML = d.coming.map(i => `<li><b>${esc(i.title)}</b> <span class="k">${esc(i.type)} · ${esc(i.due_date)} · ${when(i.days)}${i.weight_pct ? ` · ${+i.weight_pct}% of grade` : ""}</span>` +
+      (d.focus && i.due_date === d.focus.due_date && i.title === d.focus.title ? '<span class="pill big">Study for this first</span>' : "") + "</li>").join("")
+      || '<li class="k">Nothing from your planner for this class. Upload its syllabus in the course planner.</li>';
+    // ponytail: "2 sessions" = 10+ answers; a real session count needs timestamps in scores.json
+    document.getElementById("weak").innerHTML = d.weak.map(w =>
+      `<li><a href="#/${esc(w.path)}">${esc(w.title)}</a> <span class="k">${w.right}/${w.total} right</span>` +
+      (exam && exam.days <= 14 && w.right / w.total < .8 ? `<span class="pill big">${esc(exam.title)} ${when(exam.days)}</span>` : "") +
+      (w.total >= 10 && w.right / w.total < .5 ? `<div class="snip bad">Still under half after ${w.total} tries. Ask for help now:
+        tutoring center or TA drop-in hours. Ask two weeks before you think you need it.</div>` : "") + "</li>").join("") || '<li class="k">Nothing yet. Answer quiz or card questions and your weakest topics show here.</li>';
+    // a question you missed stays here until you get it right in a later quiz or deck
+    const missed = Object.entries(await fetch(`/studio/${slug}/missed.json`).then(r => r.ok ? r.json() : {}).catch(() => ({})));
+    document.getElementById("missed").innerHTML = missed.map(([q, m]) => `<li>${esc(q)}<div class="snip">
+      You: ${esc(m.text || "?")} · Answer: ${esc(m.answer)} · <a href="#/${esc(m.source)}${m.section ? "#" + encodeURIComponent(m.section) : ""}">${esc(m.section || "page")}</a></div></li>`).join("") || '<li class="k">None. Wrong answers you have not fixed yet show here.</li>';
+    outs = d.outputs; results = d.results; byId("n-study").textContent = outs.length || ""; showOuts();
+    qsources = sources; qpages = d.pages; showQuiz();
+    const dr = d.daily, run = dr && results[dr.path];
+    byId("today").innerHTML = dr ? `<div class="today${dr.done ? " done" : ""}"><span>☀</span><div><b>${dr.done ? "Today's review is done" : "Today's review"}</b>
+      <div class="k">${dr.n} question${dr.n === 1 ? "" : "s"} · about ${Math.ceil(dr.min)} min${run ? ` · ${run.right}/${run.of} right` : ""}</div></div>
+      <a class="btn" href="${esc(openHref(dr.path))}">${dr.done ? "See it" : run ? "Keep going" : "Start"}</a></div>`
+      : d.making.includes("daily") ? '<div class="today"><span class="status busy">Making today&#39;s review…</span></div>' : "";
+  }
+  refresh();
+}
+
+// math first: marked would eat the _ and \ inside $...$, so swap each formula for a placeholder, then put KaTeX back
+marked.use({breaks: true});  // wiki metadata is one "> Key: value" per line
+function render(md) {
+  const math = [];
+  const safe = md.replace(/(`+)[\s\S]*?\1|\$\$([\s\S]+?)\$\$|\$([^\s$](?:[^$\n]*?[^\s$])?)\$/g, (m, tick, block, inline) => {
+    if (tick) return m;
+    math.push(katex.renderToString(block ?? inline, {displayMode: !!block, throwOnError: false}));
+    return `@@MATH${math.length - 1}@@`;
+  });
+  return marked.parse(safe).replace(/@@MATH(\d+)@@/g, (_, i) => math[i]);
+}
+
+async function doc(path, sec) {
+  const r = await fetch("/" + path + "?raw=1");
+  const md = r.ok ? await r.text() : "";
+  page.innerHTML = `<div class="doc"><div id="body">` + (r.ok ? render(md) : "<h1>Not found</h1>") + "</div></div>";
+  if (path === "wiki/index.md" && !md.includes("](")) {
+    page.firstChild.insertAdjacentHTML("beforeend", '<p class="note">No pages yet. Open a class and add a source.</p>');
+  }
+  // wiki links are relative to the current file: .md → viewer route, everything else → the real file
+  for (const a of page.querySelectorAll("a[href]")) {
+    const h = a.getAttribute("href");
+    if (/^([a-z]+:|#)/i.test(h)) continue;
+    const u = new URL(h, location.origin + "/" + path);
+    a.href = u.pathname.endsWith(".md") ? "#" + u.pathname : u.pathname;
+  }
+  document.title = (page.querySelector("h1")?.textContent || path) + " · Class Wiki";
+  setCur(page.querySelector("h1")?.textContent || path);
+  const cls = r.ok && path.match(/^wiki\/([\w-]+)\/[\w.-]+\.md$/);
+  if (cls) await practice(path, cls[1]);
+  const h = sec && [...page.querySelectorAll("h2,h3")].find(h => h.textContent.trim() === sec);
+  if (h) setTimeout(() => {  // quiz source link: flash the whole section you missed, heading down to the next heading
+    h.scrollIntoView();
+    for (let e = h; e && (e === h || !/^H[1-3]$/.test(e.tagName)); e = e.nextElementSibling) e.classList.add("flash");
+  });
+}
+
+// Study the page the hard way (PSC 001 desirable difficulties): pre-test, blank-page recall, summary.
+const store = {get: k => { try { return localStorage.getItem(k); } catch {} }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} }};
+async function practice(path, slug) {
+  const body = document.getElementById("body");
+  body.insertAdjacentHTML("beforebegin", `<div class="practice" id="pr"><div class="row">
+    <button data-k="recall">Recall from memory</button><button class="ghost" data-k="summary">Write a summary</button></div>
+    <p class="k" id="prnote">Recall = close the page and write all you remember. Claude shows what you missed. Uses your Claude plan.</p>
+    <div id="prwork" hidden><p id="prhelp"></p><textarea id="prtext"></textarea>
+      <div class="row"><button id="prcheck">Check with Claude</button><button class="ghost" id="prshow">Show the page</button></div></div>
+    <div class="fb" id="prfb" hidden></div></div>`);
+  const $ = id => document.getElementById(id), seen = "seen:" + path, recalled = "recalled:" + path;
+  if (store.get(seen) && !(store.get(recalled) > store.get(seen))) {  // back to re-read without trying first
+    $("prnote").innerHTML = "<strong>Try recall first.</strong> Re-reading feels like learning but does not stick. The best time to re-read is the 10 minutes before a test.";
+  }
+  store.set(seen, Date.now());
+  const HELP = {
+    recall: "The page is hidden. Write everything you remember about it. Mistakes are fine: they show you what to learn.",
+    summary: "Write a summary in your own words: the question, the evidence, the conclusion. The page is hidden so you do not copy it.",
+  };
+  let kind;
+  const hide = on => { body.hidden = on; $("prwork").hidden = !on; };
+  $("pr").querySelector(".row").onclick = e => {
+    if (!(kind = e.target.dataset.k)) return;
+    hide(true); $("prfb").hidden = true;
+    $("prhelp").textContent = HELP[kind]; $("prtext").value = ""; $("prtext").focus();
+  };
+  $("prshow").onclick = () => hide(false);
+  $("prcheck").onclick = async () => {
+    const text = $("prtext").value.trim(), b = $("prcheck");
+    if (!text) return $("prtext").focus();
+    b.disabled = true; b.textContent = "Claude is checking…";
+    try {
+      const d = await post("/api/grade", {class: slug, source: path, kind, text});
+      post("/api/score", {class: slug, source: path, ok: d.ok}).catch(() => {});
+      if (kind === "recall") store.set(recalled, Date.now() + 1);
+      $("prfb").innerHTML = `<strong>${d.ok ? "Good." : "Not yet. Now compare with the page."}</strong>` + render(d.feedback);
+      $("prfb").hidden = false; body.hidden = false;
+    } catch (x) { $("prfb").textContent = x.message; $("prfb").hidden = false; }
+    b.disabled = false; b.textContent = "Check with Claude";
+  };
+
+  // Pre-test: a page you never practiced asks 3 questions first. Credit for trying, not for being right.
+  const scores = await fetch(`/studio/${slug}/scores.json`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+  if (scores[path] || store.get("pretest:" + path)) return;
+  const qs = await (await fetch("/api/questions?page=" + encodeURIComponent(path))).json();
+  if (!qs.length) return;
+  body.hidden = true;
+  body.insertAdjacentHTML("beforebegin", `<div class="practice" id="pre"><h2>Test yourself first</h2>
+    <p class="k">New page. Guess before you read: trying (even wrong) makes the page stick. Nothing is graded.</p>` +
+    qs.map((q, i) => `<p>${i + 1}. ${esc(q.q)}</p><textarea data-i="${i}" placeholder="Your best guess"></textarea>`).join("") +
+    `<div class="row"><button id="predone">Show answers and the page</button><button class="ghost" id="preskip">Skip</button></div></div>`);
+  const end = () => { store.set("pretest:" + path, 1); body.hidden = false; };
+  $("preskip").onclick = () => { $("pre").remove(); end(); };
+  $("predone").onclick = () => {
+    for (const t of $("pre").querySelectorAll("textarea")) {
+      const q = qs[t.dataset.i];
+      t.insertAdjacentHTML("afterend", `<p class="snip">Answer: ${esc(q.type === "mcq" ? q.choices[q.answer] : q.answer)}</p>`);
+      t.disabled = true;
+    }
+    $("predone").parentElement.remove(); end();
+  };
+}
+
+// Where "up" is, and the breadcrumb, for each kind of page
+let names;
+const cur = text => `<span class="cur" id="cur">${esc(text)}</span>`;
+const setCur = t => { const c = byId("cur"); if (c) c.textContent = t; };
+function where(route) {
+  const cls = m => `<a href="#/c/${m}">${esc(names[m] || m)}</a>`;
+  let m;
+  if ((m = route.match(/^c\/([\w-]+)(?:\/(\w+))?$/))) return {up: "#/", trail: `<a href="#/">Classes</a> › ${cur(names[m[1]] || m[1])}`};
+  if ((m = route.match(/^(?:view\/)?(?:wiki|raw|studio)\/([\w-]+)\/(.*)$/))) {
+    const tab = /^view\/|^studio/.test(route) ? "study" : route.startsWith("raw") ? "sources" : "wiki";
+    const label = {wiki: "Wiki", sources: "Sources", study: "Study"}[tab];
+    return {up: `#/c/${m[1]}/${tab}`, trail: `<a href="#/">Classes</a> › ${cls(m[1])} › <a href="#/c/${m[1]}/${tab}">${label}</a> › ${cur(m[2].split("/").pop())}`};
+  }
+  return {up: "#/", trail: `<a href="#/">Classes</a> › ${cur(route.split("/").pop())}`};
+}
+function crumbs(route) {
+  const box = byId("crumbs");
+  if (!route) return box.innerHTML = "";
+  const w = where(route);
+  box.innerHTML = `<button class="back" id="back" aria-label="Go back">← Back</button><nav class="trail">${w.trail}</nav>` +
+    (route.startsWith("view/") ? `<a class="ext" href="/${esc(route.slice(5))}" target="_blank">Open in a new tab ↗</a>` : "");
+  byId("back").onclick = () => history.length > 1 && document.referrer.startsWith(location.origin) || trail > 1 ? history.back() : (location.hash = w.up);
+}
+
+async function view(path) {  // a quiz, deck, slides, audio... inside the site, so the header and Back button stay
+  page.innerHTML = `<div class="frame"><iframe src="/${esc(path)}" title="Study output"></iframe></div>`;
+  document.title = path.split("/").pop() + " · Class Wiki";
+  page.querySelector("iframe").onload = e => setCur(e.target.contentDocument?.title || path.split("/").pop());
+}
+
+let trail = 0;  // pages seen since this tab opened: 1 means opened directly, so Back goes "up" instead of out of the site
+async function show() {
+  trail++;
+  const [route, sec] = location.hash.slice(2).split("#").map(decodeURIComponent);
+  const m = route.match(/^c\/([\w-]+)(?:\/(\w+))?$/);
+  if (m && page.dataset.cls === m[1]) {  // another tab of the same class: keep the page, its search boxes and its refresh loop
+    setTab(m[2]); crumbs(route);
+    for (const a of nav.querySelectorAll("a")) a.classList.toggle("on", a.getAttribute("href") === location.hash);
+    return;
+  }
+  clearTimeout(timer);
+  page.dataset.cls = "";
+  byId("fab").hidden = byId("chat").hidden = true;  // chat lives on class pages only
+  const slug = m ? m[1] : (route.match(/^(?:view\/)?(?:wiki|raw|studio)\/([\w-]+)\//) || [])[1];
+  if (!names || (slug && !names[slug])) names = Object.fromEntries((await (await fetch("/api/classes")).json()).map(c => [c.slug, c.name]));
+  document.querySelector("main").classList.toggle("wide", route.startsWith("view/"));
+  crumbs(route);
+  if (m) await klass(m[1], m[2]);
+  else if (route === "calendar") { document.title = "Calendar · Class Wiki"; await calendar(); }
+  else if (route.startsWith("view/")) await view(route.slice(5));
+  else if (route.endsWith(".md")) await doc(route, sec);
+  else { document.title = "Class Wiki"; await home(); }
+  for (const a of nav.querySelectorAll("a")) a.classList.toggle("on", a.getAttribute("href") === location.hash);
+  page.classList.remove("in"); void page.offsetWidth; page.classList.add("in");
+  if (!sec) scrollTo(0, 0);
+}
+addEventListener("hashchange", show);
+show();
+</script></body></html>

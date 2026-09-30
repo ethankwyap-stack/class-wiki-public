@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base target="_top">  <!-- source links leave the site frame -->
+<title>Quiz</title>
+<style>
+:root { --bg:#0a0908; --ink:#ece6dc; --dim:#9a9184; --line:#27221d; --glow:#e0873a; --ok:#6fbf8b; --bad:#ff7a66; }
+@media (prefers-color-scheme: light) { :root { --bg:#f5f1ea; --ink:#1a1612; --dim:#6b6357; --line:#ded6c8; --glow:#b85a14; --ok:#2e7d4f; --bad:#c62828; } }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,sans-serif; line-height:1.55; }
+body::before { content:""; position:fixed; inset:-30vh -20vw auto; height:70vh; pointer-events:none;
+  background:radial-gradient(closest-side, color-mix(in srgb, var(--glow) 28%, transparent), transparent); }
+main { position:relative; max-width:720px; margin:0 auto; padding:48px 16px 96px; }
+.label { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+h1 { font-family:ui-serif,Georgia,serif; font-weight:500; font-size:clamp(32px,6vw,52px); line-height:1.1; margin:8px 0 32px; }
+.q { border-top:1px solid var(--line); padding:28px 0; }
+.q p { font-size:19px; margin:6px 0 16px; }
+button { font:inherit; font-size:16px; color:inherit; background:transparent; border:1px solid var(--line); border-radius:10px; padding:10px 14px; cursor:pointer; transition:border-color .15s, background .15s; }
+button:hover:not(:disabled) { border-color:var(--glow); }
+button:disabled { cursor:default; }
+.choices { display:grid; gap:8px; }
+.choices button { text-align:left; }
+.right { border-color:var(--ok) !important; background:color-mix(in srgb, var(--ok) 14%, transparent); }
+.wrong { border-color:var(--bad) !important; background:color-mix(in srgb, var(--bad) 14%, transparent); }
+textarea { width:100%; font:inherit; color:inherit; background:transparent; border:1px solid var(--line); border-radius:10px; padding:10px 14px; }
+.gold { color:#e0a526; }
+.explain { margin-top:14px; color:var(--dim); }
+.explain strong { color:var(--ink); }
+a { color:var(--glow); }
+.row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+#score { position:sticky; bottom:16px; margin-top:32px; padding:14px 16px; border:1px solid var(--line); border-radius:12px; background:color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter:blur(8px); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+@media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="label" id="cls"></div>
+  <h1 id="title"></h1>
+  <div id="qs"></div>
+  <div id="score"><span id="tally">0 / 0</span><button id="copy">Copy results</button></div>
+</main>
+<script>
+const DATA = /*DATA*/null;
+// Also saved by the Class Wiki site (studio/<class>/scores.json): /study exam reads it for weak spots. Offline file: browser only.
+const SAVE = (source, ok, miss) => location.protocol !== "file:" && fetch("/api/score", {method: "POST",
+  headers: {"X-Class-Wiki": "1", "Content-Type": "application/json"}, body: JSON.stringify({class: DATA.class, source, ok, ...miss,
+    run: {out: location.pathname.slice(1), right, done, of: total}})}).catch(() => {});
+// Per-wiki-page scores, shared by every quiz and deck of this class (read by /study exam via "Copy results").
+const KEY = "studio-scores-" + DATA.class;
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+function record(source, ok, miss) {  // miss = {q, answer, text, section}: the site's Missed list
+  const s = load(); const e = s[source] || (s[source] = { right: 0, total: 0 });
+  e.total++; if (ok) e.right++;
+  try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {}
+  SAVE(source, ok, miss);
+}
+const $ = (id) => document.getElementById(id);
+const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids); return n; };
+
+document.title = DATA.title;
+$("cls").textContent = DATA.class + " · quiz";
+$("title").textContent = DATA.title;
+let right = 0, done = 0;
+const tallyUp = () => ($("tally").textContent = `${right} / ${done} right · ${total - done} left`);
+
+const ONLINE = location.protocol !== "file:";
+// Typed answers: Claude grades them on the site (/api/grade). Offline file: you grade yourself.
+const grade = (q, text) => fetch("/api/grade", {method: "POST", headers: {"X-Class-Wiki": "1", "Content-Type": "application/json"},
+  body: JSON.stringify({class: DATA.class, source: q.source, kind: "answer", question: q.q, answer: q.answer, text})})
+  .then((r) => r.json()).then((d) => { if (d.error) throw new Error(d.error); return d; });
+const total = DATA.questions.length;
+
+function ask(q, n, retry) {
+  const box = el("section", { className: "q" }, el("div", { className: "label" + (q.challenge ? " gold" : ""), textContent: (retry ? "Try again · " : "") + (q.challenge ? `Challenge ${n}` : `Question ${n}`) }), el("p", { textContent: q.q }));
+  const explain = () => el("div", { className: "explain" },
+    q.type === "short" ? el("div", {}, el("strong", { textContent: "Answer: " }), q.answer) : "",
+    el("div", { textContent: q.explain || "" }),
+    el("a", { href: q.href, textContent: "Source: " + q.source + (q.section ? " › " + q.section : "") }));
+  // A miss is a signal: link to the section, and the question comes back once at the end
+  // A retry right after the miss does not clear it from the Missed list: only a later quiz does
+  const finish = (ok, text) => { if (!retry) { done++; if (ok) right++; }
+    record(q.source, ok, !retry && { q: q.q, answer: q.type === "mcq" ? q.choices[q.answer] : q.answer, text, section: q.section });
+    tallyUp(); if (!ok && !retry) ask(q, n, true); };
+
+  if (q.type === "mcq") {
+    const list = el("div", { className: "choices" });
+    q.choices.forEach((c, j) => list.append(el("button", { textContent: c, onclick() {
+      list.querySelectorAll("button").forEach((b, k) => { b.disabled = true; if (k === q.answer) b.classList.add("right"); });
+      if (j !== q.answer) this.classList.add("wrong");
+      if (j !== q.answer && q.why && q.why[j]) box.append(el("div", { className: "explain" }, el("strong", { textContent: "Why not “" + c + "”: " }), q.why[j]));
+      box.append(explain()); finish(j === q.answer, c);
+    } })));
+    box.append(list);
+  } else {  // write it before you see it
+    const input = el("textarea", { rows: 3, placeholder: "Type your answer from memory" });
+    const check = el("button", { textContent: "Check", async onclick() {
+      const text = input.value.trim();
+      if (!text) return input.focus();
+      input.disabled = check.disabled = true;
+      if (ONLINE) {
+        check.textContent = "Claude is grading…";
+        try {
+          const d = await grade(q, text);
+          check.remove(); input.classList.add(d.ok ? "right" : "wrong");
+          box.append(el("div", { className: "explain" }, el("strong", { textContent: d.ok ? "Right. " : "Not yet. " }), d.feedback), explain());
+          return finish(d.ok, text);
+        } catch { check.textContent = "Grading failed: grade yourself"; }
+      }
+      check.remove(); box.append(explain());
+      const row = el("div", { className: "row" });
+      const pick = (ok) => () => { row.remove(); input.classList.add(ok ? "right" : "wrong"); finish(ok, text); };
+      row.append(el("button", { textContent: "I got it", onclick: pick(true) }), el("button", { textContent: "I missed it", onclick: pick(false) }));
+      box.append(row);
+    } });
+    const hint = q.hint && el("button", { textContent: "Hint", onclick() { this.replaceWith(el("div", { className: "explain", textContent: "Hint: " + q.hint })); } });
+    box.append(input, el("div", { className: "row" }, check, hint || ""));
+  }
+  $("qs").append(box);
+}
+DATA.questions.forEach((q, i) => ask(q, i + 1));
+tallyUp();
+
+$("copy").onclick = async () => {
+  const lines = Object.entries(load()).sort((a, b) => a[1].right / a[1].total - b[1].right / b[1].total)
+    .map(([src, e]) => `- ${src}: ${e.right}/${e.total}`);
+  await navigator.clipboard.writeText(`Study scores for ${DATA.class} (weakest first):\n` + lines.join("\n"));
+  $("copy").textContent = "Copied"; setTimeout(() => ($("copy").textContent = "Copy results"), 1500);
+};
+</script>
+</body>
+</html>

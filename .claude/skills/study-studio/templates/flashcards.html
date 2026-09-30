@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base target="_top">  <!-- source links leave the site frame -->
+<title>Flashcards</title>
+<style>
+:root { --bg:#0a0908; --ink:#ece6dc; --dim:#9a9184; --line:#27221d; --glow:#e0873a; --ok:#6fbf8b; --bad:#ff7a66; }
+@media (prefers-color-scheme: light) { :root { --bg:#f5f1ea; --ink:#1a1612; --dim:#6b6357; --line:#ded6c8; --glow:#b85a14; --ok:#2e7d4f; --bad:#c62828; } }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,sans-serif; line-height:1.55; }
+body::before { content:""; position:fixed; inset:-30vh -20vw auto; height:70vh; pointer-events:none;
+  background:radial-gradient(closest-side, color-mix(in srgb, var(--glow) 28%, transparent), transparent); }
+main { position:relative; max-width:640px; margin:0 auto; padding:48px 16px 64px; }
+.label { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+h1 { font-family:ui-serif,Georgia,serif; font-weight:500; font-size:clamp(32px,6vw,52px); line-height:1.1; margin:8px 0 24px; }
+#card { min-height:260px; border:1px solid var(--line); border-radius:16px; padding:28px 24px; cursor:pointer; display:flex; flex-direction:column; justify-content:center; gap:16px; transition:border-color .2s; }
+#card:hover { border-color:var(--glow); }
+#front { font-size:22px; }
+#back { font-size:19px; color:var(--dim); }
+#guess { font:inherit; color:inherit; background:transparent; border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+#mine { font-size:15px; } #mine::before { content:"Your guess: "; color:var(--dim); }
+#back[hidden] + a { display:none; }
+a { color:var(--glow); font-size:14px; }
+button { font:inherit; font-size:16px; color:inherit; background:transparent; border:1px solid var(--line); border-radius:10px; padding:12px 18px; cursor:pointer; flex:1; }
+#again:hover { border-color:var(--bad); } #got:hover { border-color:var(--ok); }
+.row { display:flex; gap:10px; margin-top:16px; }
+#boxes { display:flex; gap:6px; margin-top:28px; }
+#boxes div { flex:1; text-align:center; border-top:3px solid var(--line); padding-top:6px; font-size:13px; color:var(--dim); }
+@media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="label" id="cls"></div>
+  <h1 id="title"></h1>
+  <div class="label" id="status"></div>
+  <div id="card" tabindex="0" role="button" aria-label="Type a guess, then flip the card">
+    <div id="front"></div>
+    <textarea id="guess" rows="2" placeholder="Your guess, from memory. Then flip."></textarea>
+    <div id="mine" hidden></div>
+    <div id="back" hidden></div>
+    <a id="src"></a>
+  </div>
+  <div class="row" id="grade" hidden>
+    <button id="again">Again</button>
+    <button id="got">Got it</button>
+  </div>
+  <div id="boxes"></div>
+</main>
+<script>
+const DATA = /*DATA*/null;
+// Also saved by the Class Wiki site (studio/<class>/scores.json): /study exam reads it for weak spots. Offline file: browser only.
+const SAVE = (source, ok, miss) => location.protocol !== "file:" && fetch("/api/score", {method: "POST",
+  headers: {"X-Class-Wiki": "1", "Content-Type": "application/json"}, body: JSON.stringify({class: DATA.class, source, ok, ...miss})}).catch(() => {});
+const $ = (id) => document.getElementById(id);
+const DAY = 864e5, WAIT = [0, 0, 1, 3, 7, 14]; // days before a card in box N comes back
+const DECK = "studio-deck-" + DATA.class + "-" + DATA.title;
+const SCORES = "studio-scores-" + DATA.class; // shared with quizzes
+const read = (k) => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } };
+const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+const state = read(DECK); // front -> { box, due }
+DATA.cards.forEach((c) => (state[c.front] ||= { box: 1, due: 0 }));
+let queue = DATA.cards.filter((c) => state[c.front].due <= Date.now());
+let cur = null;
+
+document.title = DATA.title;
+$("cls").textContent = DATA.class + " · flashcards";
+$("title").textContent = DATA.title;
+
+function show() {
+  const boxes = [1, 2, 3, 4, 5].map((b) => `<div>Box ${b}<br>${DATA.cards.filter((c) => state[c.front].box === b).length}</div>`);
+  $("boxes").innerHTML = boxes.join("");
+  $("grade").hidden = true;
+  $("back").hidden = true;
+  $("mine").hidden = true; $("guess").hidden = false; $("guess").value = "";
+  cur = queue.shift();
+  if (!cur) {
+    const next = Math.min(...DATA.cards.map((c) => state[c.front].due));
+    $("status").textContent = "Done for now";
+    $("front").textContent = "No cards due. Next one: " + new Date(next).toLocaleDateString();
+    $("src").textContent = "";
+    return;
+  }
+  $("status").textContent = `${queue.length + 1} due`;
+  $("front").textContent = cur.front;
+  $("back").textContent = cur.back;
+  $("src").textContent = "Source: " + cur.source;
+  $("src").href = cur.href;
+}
+
+// Write a guess before the back shows: recall, not recognition (PSC 001 desirable difficulties)
+function flip() {
+  if (!cur || !$("back").hidden) return;
+  const g = $("guess").value.trim();
+  if (!g) { $("guess").placeholder = "Type a guess first (a wrong guess still helps you learn)"; return $("guess").focus(); }
+  $("mine").textContent = g; $("mine").hidden = false; $("guess").hidden = true;
+  $("back").hidden = false; $("grade").hidden = false;
+}
+$("card").onclick = (e) => { if (!["A", "TEXTAREA"].includes(e.target.tagName)) flip(); };
+$("card").onkeydown = (e) => { if (e.key === "Enter" && !e.shiftKey || e.key === " " && e.target.tagName !== "TEXTAREA") { e.preventDefault(); flip(); } };
+
+function grade(ok) {
+  const s = state[cur.front];
+  s.box = ok ? Math.min(s.box + 1, 5) : 1;
+  s.due = ok ? Date.now() + WAIT[s.box] * DAY : 0; // missed = due now
+  if (!ok) queue.push(cur); // missed cards come back this session
+  const sc = read(SCORES); const e = sc[cur.source] || (sc[cur.source] = { right: 0, total: 0 });
+  e.total++; if (ok) e.right++;
+  write(SCORES, sc); write(DECK, state);
+  SAVE(cur.source, ok, { q: cur.front, answer: cur.back, text: $("mine").textContent });  // Missed list
+  show();
+}
+$("again").onclick = () => grade(false);
+$("got").onclick = () => grade(true);
+show();
+</script>
+</body>
+</html>

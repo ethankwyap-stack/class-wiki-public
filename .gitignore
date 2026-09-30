@@ -1,0 +1,20 @@
+studio/**/*.mp3
+studio/**/*.mp4
+studio/**/*.wav
+.venv/
+.models/
+__pycache__/
+.DS_Store
+inbox/*
+!inbox/.gitkeep
+*.log
+studio/**/frames/
+.trash/
+.planner-cache.json
+studio/*/results.json
+studio/*/scores.json
+studio/*/missed.json
+studio/*/review.json
+
+# graded work with a name + student ID in the picture: the .md copy has [removed], keep the original local
+raw/mat-19a/files/Math-diagnostic-test.pdf
