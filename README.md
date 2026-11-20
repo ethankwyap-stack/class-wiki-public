@@ -1,12 +1,12 @@
 # Class Wiki
 
-**Turn lectures, slides, whiteboard photos, and YouTube videos into a fact-checked study wiki for every class. It runs on your own Mac at $0, and you can open it on your phone through Tailscale.**
+**Turn lectures, slides, whiteboard photos, and YouTube videos into a source-grounded study wiki for every class. It runs on your own Mac (the AI part uses a Claude subscription, not a paid API key), and you can open it on your phone through Tailscale.**
 
 ![Python](https://img.shields.io/badge/python-3.9%2B-3776AB?logo=python&logoColor=white)
 ![Dependencies](https://img.shields.io/badge/dependencies-stdlib%20only-2ea44f)
-![Runs](https://img.shields.io/badge/runs-100%25%20local-6f42c1)
-![Cost](https://img.shields.io/badge/cost-%240-success)
-![Tests](https://img.shields.io/badge/tests-88%20passing-brightgreen)
+![Runs](https://img.shields.io/badge/hosted-on%20my%20Mac-6f42c1)
+![Cost](https://img.shields.io/badge/hosting-%240-success)
+![Tests](https://img.shields.io/badge/tests-104%20passing-brightgreen)
 
 Class Wiki is a local, NotebookLM-style workspace. You add a class, drop in your sources, and Claude writes an interlinked markdown wiki from them. The wiki follows [Andrej Karpathy's LLM-wiki pattern](https://github.com/Astro-Han/karpathy-llm-wiki). Every fact on a page must quote the source it came from, and an automatic checker tests this after each ingest. From the wiki, one command makes quizzes, flashcards, slides, audio overviews, mind maps, and exam prep.
 
@@ -16,6 +16,10 @@ Class Wiki is a local, NotebookLM-style workspace. You add a class, drop in your
   <img src="docs/quiz-tab.png" alt="Quiz tab: tick lectures or topics, or type your own" width="49%">
   <img src="docs/wiki-page.png" alt="A wiki page with recall, summary, and a pre-test before reading" width="49%">
 </p>
+
+## Why I built it
+
+My class material was spread across Canvas, slides and notebooks. NotebookLM's free plan stops at 50 sources a notebook, and one class passes that in a few weeks. I wanted one place per class that never forgets a source, ties its claims back to that source, and quizzes me on what I'm about to forget. So I built it and used it for my own first-quarter classes at UC Davis.
 
 ---
 
@@ -29,7 +33,7 @@ Class Wiki is a local, NotebookLM-style workspace. You add a class, drop in your
 | **YouTube** | Uses the `watch` skill. It reads the frames for the board and slides, plus the captions. Claude writes on-screen notes and keeps the full transcript. |
 | **Auto-ingest** | Dropping a file starts a background ingest (one at a time). New pages appear without a reload. |
 | **Merges, never duplicates** | A new source updates the pages that already exist. When sources disagree, the claim is marked **Disputed**. When a fact is replaced, it is marked **Outdated**. History is never silently rewritten. |
-| **Grounded** | Every page links to its raw source. `check_evidence.py` confirms that each quoted fact appears word for word in the source. |
+| **Grounded** | Every page links to its raw source. `check_evidence.py` checks that quoted lines, numbers and dates really appear in the linked source. Judgment calls are still left to the reader. |
 | **Math** | LaTeX renders with KaTeX. It is vendored, so it works offline. |
 | **Daily review** | Each morning, one short quiz per class (15 min at most, never padded): pages due for review (spaced repetition), a few new pages, and missed questions asked a new way. No question is ever repeated. New pages come faster when an exam is near. |
 | **Past test questions** | Upload old test or Canvas quiz questions (screenshots in a PDF work). Each question is filed under the concept it tests, and those concepts get more practice in your quizzes, asked the way your teacher asks. Wrong answer choices never become facts. |
@@ -63,7 +67,7 @@ Claude runs through the `claude` CLI that is already logged in on your Mac. It u
 
 ## Quick start
 
-**Requirements:** macOS, Python 3.9+, and a logged-in [Claude Code](https://claude.com/claude-code) CLI. Install the rest from Homebrew:
+**Requirements:** macOS, Python 3.9+, and a logged-in [Claude Code](https://claude.com/claude-code) CLI. YouTube links also need the `watch` Claude Code skill installed. Install the rest from Homebrew:
 
 ```bash
 brew install poppler yt-dlp ffmpeg   # pdftotext, YouTube, video
@@ -75,14 +79,14 @@ Docker is optional. It is only needed for the Kokoro audio voices, and without i
 
 ```bash
 git clone https://github.com/ethankwyap-stack/class-wiki-public.git
-cd class-wiki
+cd class-wiki-public
 python3 serve.py            # → http://localhost:4323
 ```
 
-**Keep it running (optional).** A LaunchAgent can start it at login. Give it a `PATH` that includes `~/.local/bin` (for `claude`) and `/opt/homebrew/bin`, because launchd starts with a minimal environment. Then restart it with:
+**Keep it running (optional).** You can write your own LaunchAgent (not included) to start it at login. Give it a `PATH` that includes `~/.local/bin` (for `claude`) and `/opt/homebrew/bin`, because launchd starts with a minimal environment. Then restart it with:
 
 ```bash
-launchctl kickstart -k gui/$(id -u)/com.ethanyap.class-wiki
+launchctl kickstart -k gui/$(id -u)/com.example.class-wiki
 ```
 
 ## Usage
@@ -163,18 +167,24 @@ The site is built for one person on one machine:
 - **CSRF guard.** Every write must carry the header `X-Class-Wiki: 1`. A browser must ask permission (a CORS preflight) before another website can send that header, and this server never grants it.
 - **Allow-listed reads.** Only `wiki/`, `raw/`, `studio/`, and `site/` are served. Code, config, and the inbox return 404.
 - **Safe uploads.** File names are sanitized, types are allow-listed, size is capped at 500 MB, and files are never overwritten. YouTube links are checked by host name.
-- **Constrained Claude.** Headless runs may only read and write files in the project. They have no shell and cannot delete files.
+- **Constrained Claude.** Headless ingest runs may only read and write files in the project and the source folder being ingested. Study Studio runs get a short allow-list of shell commands, nothing more.
 - **Sandboxed third-party code.** The upstream skill was vetted in Docker with `--network none`. Kokoro TTS only ever runs inside a container with no network.
 
 ## Testing
 
 ```bash
-python3 -m unittest discover tests                            # site + conversion + overlap (52 tests)
-cd .claude/skills/study-studio && python3 -m unittest discover tests   # study tools (36 tests)
+python3 -m unittest discover tests                            # site + conversion + overlap (57 tests)
+cd .claude/skills/study-studio && python3 -m unittest discover tests   # study tools (47 tests)
 python3 .claude/skills/karpathy-llm-wiki/scripts/check_evidence.py .    # wiki lint → 0 evidence errors
 ```
 
-All tests use only the standard library. Claude and yt-dlp are stubbed, so the suite runs offline in seconds.
+All tests use only the standard library. Claude and yt-dlp are stubbed, so no network is needed. The audio and video tests also need ffmpeg and a speech engine on the machine.
+
+## How I built it
+
+I came up with the idea, designed how it works, and tested it by studying with it every day. Each problem I hit while studying became a fix: 30+ rounds of that. I wrote the code with [Claude Code](https://claude.com/claude-code) as my pair programmer. I chose to vet the third-party wiki skill inside a no-network Docker container before letting it touch my files.
+
+This repo is the public copy of the tool, with none of my class content.
 
 ## Credits
 
